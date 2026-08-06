@@ -1,0 +1,22 @@
+{
+  "experiment_id": "vibegamer-demo",
+  "evaluation_suite": "engineering_smoke_v2",
+  "harness_version": "2.0",
+  "observation_mode": "structured_sim",
+  "scaffold_id": "rule_bot_v1",
+  "score_profile": "research_v2",
+  "backend": "sim",
+  "runs_per_round": 1,
+  "seed": 20260724,
+  "fixed_map": "river_gate",
+  "unseen_map": "fog_crossroads",
+  "max_waves": 12,
+  "models": [
+    {"name": "稳健派", "provider": "rule", "model": "conservative"},
+    {"name": "火力派", "provider": "rule", "model": "aggressive"},
+    {"name": "均衡派", "provider": "rule", "model": "balanced"},
+    {"name": "随机甲", "provider": "rule", "model": "random"},
+    {"name": "随机乙", "provider": "rule", "model": "random"},
+    {"name": "随机丙", "provider": "rule", "model": "random"}
+  ]
+}

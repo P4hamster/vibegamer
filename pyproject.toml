@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vibegamer"
+version = "0.1.0"
+description = "A reproducible LLM evaluation harness for TowerMind."
+requires-python = ">=3.10,<3.13"
+dependencies = []
+
+[project.optional-dependencies]
+llm = ["litellm>=1.70,<2", "tenacity>=8,<10"]
+towermind = ["mlagents==1.1.0", "gym>=0.26,<0.27"]
+dev = ["pytest>=8,<9", "dnfile>=0.18,<0.19", "dncil>=1,<2"]
+
+[project.scripts]
+tower-referee = "tower_referee.cli:main"
+tower-campaign-local = "tower_referee.local_campaign:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+
+[tool.uv.extra-build-dependencies]
+grpcio = ["setuptools<81"]

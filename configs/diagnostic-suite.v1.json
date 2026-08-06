@@ -1,0 +1,253 @@
+{
+  "suite_id": "towermind-strategy-diagnostics",
+  "version": "0.3-draft-diagnostic-assumptions-v1",
+  "status": "draft_pending_human_review",
+  "tasks": [
+    {
+      "id": "plan-validation-decoy-site",
+      "capability": "计划验证与空间布防",
+      "primary_grader": "deterministic",
+      "state": {
+        "wave": 0,
+        "max_waves": 5,
+        "base_hp": 20,
+        "max_base_hp": 20,
+        "gold": 120,
+        "available_actions": ["build", "noop"],
+        "build_sites": [[-2.0, 0.0], [0.0, 0.0]],
+        "enemy_paths": [[[-1.0, -1.0], [0.0, 0.0], [1.0, 1.0]]],
+        "game_rules": {
+          "tower_costs": {"archer": 120, "magician": 110, "knight": 100}
+        },
+        "site_insights": [
+          {
+            "site_id": "site_decoy",
+            "position": [-2.0, 0.0],
+            "objective_zone": "entrance",
+            "path_coverage": {"archer": [], "magician": [], "knight": []}
+          },
+          {
+            "site_id": "site_effective",
+            "position": [0.0, 0.0],
+            "objective_zone": "middle",
+            "path_coverage": {
+              "archer": ["main"],
+              "magician": ["main"],
+              "knight": ["main"]
+            }
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "no_invalid_actions",
+          "description": "动作必须能被当前游戏状态执行"
+        },
+        {
+          "kind": "build_at_any",
+          "positions": [[0.0, 0.0]],
+          "description": "有限预算应避开完全覆盖不到道路的误导塔位"
+        }
+      ],
+      "reference_solution": [
+        {"type": "build", "tower": "knight", "position": [0.0, 0.0]}
+      ]
+    },
+    {
+      "id": "risk-response-visible-air",
+      "capability": "空地混合威胁下的风险权衡",
+      "primary_grader": "counterfactual_replay",
+      "outcome_objective": "在同一批空中与地面敌人结束时，使基地生命损失和加权漏怪数最小；不预设必须建弓箭塔。",
+      "human_note": "用户指出：当飞行怪与地面怪同时存在时，单独补防空未必是全局最优。需要比较候选决策在相同后续战局中的实际结果。",
+      "state": {
+        "wave": 2,
+        "max_waves": 5,
+        "base_hp": 20,
+        "max_base_hp": 20,
+        "gold": 120,
+        "available_actions": ["build", "noop"],
+        "build_sites": [[0.0, 0.0]],
+        "enemy_paths": [[[-1.0, 0.0], [0.0, 0.0], [1.0, 0.0]]],
+        "visible_enemies": [
+          {
+            "id": "air_01",
+            "kind": "Demon Bat",
+            "hp": 80,
+            "max_hp": 80,
+            "progress": 0.55,
+            "lane": "main",
+            "position": [0.1, 0.0],
+            "flying": true,
+            "movement_type": "air",
+            "distance_to_base": 1.0,
+            "estimated_seconds_to_base": 6.0
+          },
+          {
+            "id": "ground_01",
+            "kind": "Orc",
+            "hp": 260,
+            "max_hp": 260,
+            "progress": 0.72,
+            "lane": "main",
+            "position": [0.45, 0.0],
+            "flying": false,
+            "movement_type": "ground",
+            "distance_to_base": 0.55,
+            "estimated_seconds_to_base": 3.5
+          },
+          {
+            "id": "ground_02",
+            "kind": "Orc",
+            "hp": 260,
+            "max_hp": 260,
+            "progress": 0.68,
+            "lane": "main",
+            "position": [0.35, 0.0],
+            "flying": false,
+            "movement_type": "ground",
+            "distance_to_base": 0.65,
+            "estimated_seconds_to_base": 4.0
+          }
+        ],
+        "game_rules": {
+          "tower_costs": {"archer": 120, "magician": 110, "knight": 100},
+          "anti_air": "Only archer towers can reliably attack flying enemies.",
+          "tower_combat": {
+            "provenance": {
+              "classification": "diagnostic_assumption",
+              "source": "constructed for this offline counterfactual replay",
+              "not_verified_as": "TowerMind native targeting policy or production combat balance"
+            },
+            "tower_activation": "A newly built tower attacks immediately.",
+            "targeting": "closest_to_base",
+            "targeting_explanation": "Diagnostic assumption: each tower attacks one eligible enemy on a covered lane: lowest estimated_seconds_to_base first; ties use higher progress, then enemy id. This is not a verified TowerMind native targeting policy.",
+            "simulation_time_step_seconds": 0.05,
+            "tower_profiles": {
+              "archer": {"dps": 30, "targets": ["air", "ground"]},
+              "magician": {"dps": 100, "targets": ["ground"]},
+              "knight": {"dps": 150, "targets": ["ground"]}
+            },
+            "enemy_leak_profiles": {
+              "Demon Bat": {"base_damage": 2, "leak_weight": 2},
+              "Orc": {"base_damage": 3, "leak_weight": 1}
+            },
+            "note": "These are published assumptions for this diagnostic short battle. They are not verified TowerMind production balance values or native targeting rules."
+          }
+        },
+        "site_insights": [
+          {
+            "site_id": "site_air_cover",
+            "position": [0.0, 0.0],
+            "objective_zone": "middle",
+            "path_coverage": {
+              "archer": ["main"],
+              "magician": ["main"],
+              "knight": ["main"]
+            }
+          }
+        ]
+      },
+      "counterfactual_replay": {
+          "simulator_version": "diagnostic-short-battle-v1",
+          "provenance": {
+            "classification": "diagnostic_assumption",
+            "source": "constructed for this offline counterfactual replay",
+            "not_verified_as": "TowerMind native targeting policy or production combat balance"
+          },
+          "targeting": "closest_to_base",
+          "time_step_seconds": 0.05,
+          "tower_profiles": {
+            "archer": {"dps": 30, "targets": ["air", "ground"]},
+            "magician": {"dps": 100, "targets": ["ground"]},
+            "knight": {"dps": 150, "targets": ["ground"]}
+          },
+          "enemy_profiles": {
+            "Demon Bat": {"base_damage": 2, "leak_weight": 2},
+            "Orc": {"base_damage": 3, "leak_weight": 1}
+          },
+          "objective_order": ["base_hp_lost", "weighted_leaks"],
+          "note": "这是供诊断题反事实比较使用的公开、确定性短战局假设；其中目标优先级并非已验证的 TowerMind 原生规则。它不代表正式战斗数值，也不预设任何塔型为正确答案。"
+        },
+      "checks": [
+        {
+          "kind": "no_invalid_actions",
+          "description": "动作必须能被当前游戏状态执行"
+        }
+      ],
+      "review_rubric": [
+        "是否同时识别空中与地面威胁，而不是只复述其中一种",
+        "是否比较各类敌人的到达时间、生命和现有防线",
+        "动作执行后的实际基地生命损失",
+        "实际漏怪数及敌人类型",
+        "是否存在相同资源下损失更低的候选动作"
+      ]
+    },
+    {
+      "id": "action-grounding-insufficient-gold",
+      "capability": "资源不足时的策略形成与规则落地",
+      "primary_grader": "human_review",
+      "human_note": "用户认为不应把空操作设为唯一答案；应观察模型会等待、设置条件计划、调动免费单位还是采取其他合理动作。",
+      "state": {
+        "wave": 1,
+        "max_waves": 5,
+        "base_hp": 20,
+        "max_base_hp": 20,
+        "gold": 60,
+        "available_actions": [
+          "build",
+          "move_hero",
+          "deploy_reinforcements",
+          "noop"
+        ],
+        "build_sites": [[0.0, 0.0]],
+        "visible_enemies": [
+          {
+            "id": "ground_01",
+            "kind": "Goblin",
+            "hp": 70,
+            "max_hp": 70,
+            "progress": 0.3,
+            "lane": "main",
+            "position": [-0.5, 0.0],
+            "flying": false,
+            "movement_type": "ground",
+            "distance_to_base": 1.5,
+            "estimated_seconds_to_base": 10.0
+          }
+        ],
+        "hero": {
+          "position": [0.0, -0.5],
+          "hp": 1600,
+          "max_hp": 1600,
+          "dead": false,
+          "revive_countdown": 0
+        },
+        "dropped_gold": {
+          "position": [-0.4, -0.2],
+          "remaining_lifetime": 8.0
+        },
+        "reinforcement_countdown": 0,
+        "game_rules": {
+          "tower_costs": {"archer": 120, "magician": 110, "knight": 100}
+        }
+      },
+      "checks": [
+        {
+          "kind": "no_invalid_actions",
+          "description": "金币不足时不能提交无法执行的即时购买"
+        },
+        {
+          "kind": "avoid_immediate_action_types",
+          "action_types": ["build", "upgrade", "upgrade_hero"],
+          "description": "可以等待或设置未来条件，但不能把未来计划当成立刻可执行动作"
+        }
+      ],
+      "review_rubric": [
+        "是否明确认识到当前金币不足",
+        "是否提出可执行的免费行动、条件计划或有理由的等待",
+        "是否说明下一次资源阈值和行动触发条件",
+        "是否反复提交明知无法支付的动作"
+      ]
+    }
+  ]
+}

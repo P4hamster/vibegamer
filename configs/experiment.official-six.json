@@ -1,0 +1,111 @@
+{
+  "experiment_id": "six-ai-defense-official",
+  "evaluation_suite": "competition_v2",
+  "harness_version": "2.5",
+  "observation_mode": "semantic_structured_compact",
+  "scaffold_id": "two_phase_high_plan_action_v3",
+  "score_profile": "research_v2",
+  "backend": "towermind",
+  "runs_per_round": 1,
+  "seed": 20260724,
+  "fixed_map": "0",
+  "unseen_map": "3",
+  "max_waves": 5,
+  "temperature": 0.0,
+  "provider_seed": 20260724,
+  "max_tokens": 8192,
+  "model_request_timeout_seconds": 30,
+  "model_request_retries": 0,
+  "event_driven": true,
+  "max_decisions_per_run": 50,
+  "monitor_max_steps": 600,
+  "low_priority_event_debounce_seconds": 3.0,
+  "watchdog_max_game_steps": 12000,
+  "campaign_maps": ["0", "1", "3", "2", "4"],
+  "campaign_transition_seconds": 4,
+  "campaign_max_retries": 0,
+  "level_overrides": {},
+  "towermind_executable": "vendor/TowerMind/plugin_runtime/mac_apple_silicon/td.app",
+  "towermind_screen_width": 1600,
+  "towermind_screen_height": 900,
+  "towermind_quality_level": 2,
+  "towermind_fullscreen": true,
+  "towermind_plugin_url": "http://127.0.0.1:17871",
+  "towermind_plugin_required": true,
+  "models": [
+    {
+      "name": "GPT",
+      "provider": "litellm",
+      "model": "openai/gpt-5.6-sol",
+      "reasoning_effort": "medium",
+      "provider_seed_mode": "best_effort"
+    },
+    {
+      "name": "Claude",
+      "provider": "litellm",
+      "model": "anthropic/claude-opus-4-8",
+      "omit_temperature": true,
+      "provider_seed_mode": "best_effort"
+    },
+    {
+      "name": "DeepSeek",
+      "provider": "litellm",
+      "model": "deepseek/deepseek-v4-flash",
+      "omit_temperature": true,
+      "reasoning_effort": "high",
+      "provider_seed_mode": "best_effort",
+      "request_timeout_seconds": 60,
+      "decision_pipeline": "plan_then_action",
+      "planning_max_tokens": 8192,
+      "action_max_tokens": 2048,
+      "request_params": {
+        "allowed_openai_params": ["reasoning_effort"],
+        "stream": true,
+        "response_format": {"type": "json_object"},
+        "extra_body": {"thinking": {"type": "enabled"}}
+      },
+      "planning_request_params": {
+        "allowed_openai_params": ["reasoning_effort"],
+        "stream": true,
+        "extra_body": {"thinking": {"type": "enabled"}}
+      },
+      "action_request_params": {
+        "stream": true,
+        "response_format": {"type": "json_object"},
+        "extra_body": {"thinking": {"type": "disabled"}}
+      }
+    },
+    {
+      "name": "Kimi",
+      "provider": "litellm",
+      "model": "moonshot/kimi-k3",
+      "api_base": "https://api.moonshot.cn/v1",
+      "omit_temperature": true,
+      "reasoning_effort": "high",
+      "provider_seed_mode": "best_effort",
+      "request_timeout_seconds": 60,
+      "request_params": {
+        "allowed_openai_params": ["reasoning_effort"],
+        "stream": true
+      }
+    },
+    {
+      "name": "豆包",
+      "provider": "litellm",
+      "model": "volcengine/doubao-seed-2-1-pro-260628",
+      "reasoning_effort": "medium",
+      "provider_seed_mode": "best_effort",
+      "request_timeout_seconds": 60,
+      "request_params": {
+        "allowed_openai_params": ["reasoning_effort"],
+        "stream": true
+      }
+    },
+    {
+      "name": "GLM",
+      "provider": "litellm",
+      "model": "zai/glm-5.2",
+      "provider_seed_mode": "best_effort"
+    }
+  ]
+}
