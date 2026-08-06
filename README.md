@@ -1,50 +1,54 @@
 # vibegamer
 
-`vibegamer` 是一套 TowerMind 大模型塔防评测工具。它统一模型输入、合法动作、
-关卡终局和结果记录，让不同模型在同一套规则下完成五地图闯关。
+`vibegamer` 是一套让不同大模型接管 TowerMind，并完成可验证实验的 Agent 运行时与评测系统。
+
+接入一个模型 API，系统负责读取战场、请求决策、执行动作、连续运行关卡、判定结果，
+并输出可复查的实验记录。
 
 项目基于 [TowerMind](https://github.com/tb6147877/TowerMind) 和
 [LiteLLM](https://github.com/BerriAI/litellm)。本仓库不包含 TowerMind 游戏二进制。
 
 当前版本：`v0.1.0` / Harness `2.5` / Python `3.10-3.12`
 
-## 做了什么
+## 核心系统
 
-- 为 TowerMind 增加 Observer/HUD，输出稳定塔位 ID、路线、可见敌情和精确战斗遥测。
-- 实现事件驱动裁判、动作校验、条件计划和统一的本地微操器。
-- 通过 LiteLLM 接入不同供应商，记录请求参数、流式思考、最终 JSON 和修复过程。
-- 只接受 ML-Agents 原生 terminal 作为完整关卡结果；中断、超时和预算耗尽记为无效。
-- 导出原始事件、有效性报告、JSON/CSV 成绩、HTML 看板和逐次决策记录。
+### 1. 大模型可操作的 TowerMind 语义环境
 
-## 结构
+Observer 将 Unity/Gym 状态转换成稳定塔位、路线、可见敌情、金币、生命和冷却等语义字段，
+并提供建造、升级、出售、英雄、骑士和援军等 12 类游戏动作。
+
+### 2. LLM Agent 运行时
+
+运行时通过 LiteLLM 接入不同供应商，形成“观察战场 → 模型决策 → 动作校验与执行 →
+推进游戏 → 事件触发下一次决策”的完整循环。它支持条件计划、本地微操、流式响应和
+规划/行动两阶段请求。
+
+### 3. 可验证实验裁判
+
+裁判采用三项会直接影响实验结论的核心规则：
+
+- **结果只认原生终局**：进入最后一波不算通关，完整地图必须收到 ML-Agents terminal。
+- **每关先验新开局**：模型调用前检查波次、步数、经济、预建塔和地图指纹；脏状态自动
+  reset 或重启 Unity，仍异常则不调用模型。
+- **异常不进入成绩**：中断、watchdog、决策预算耗尽和模型请求失败统一标为 invalid；
+  续跑只继承连续且已确认通关的关卡，中断关卡重新开始。
+
+## 架构
 
 | 模块 | 职责 |
 | --- | --- |
-| `src/tower_referee/` | 模型调用、动作校验、事件调度、评分和审计 |
 | `plugin/TowerMind.Observer/` | 游戏状态投影、命令桥、遥测和 HUD |
-| `configs/` | 模型、赛制和录屏配置 |
-| `scripts/` | 插件安装、机制生成、A/B 和诊断工具 |
-| `tests/` | 模型适配、终局、续跑、插件桥和评分回归 |
+| `src/tower_referee/game/` | TowerMind 与模拟后端适配 |
+| `src/tower_referee/models.py` | 模型供应商、流式响应和两阶段决策 |
+| `src/tower_referee/runner.py` | 决策循环、关卡编排、终局和续跑 |
+| `src/tower_referee/recorder.py` | 事件、有效性、成绩和看板 |
 
 ```text
-TowerMind -> Observer -> structured state -> LiteLLM model
+TowerMind -> Observer -> structured state -> LLM
           <- ML-Agents <- validated actions <- referee
                                   |
                                   -> events / validity / summary / dashboard
 ```
-
-## 四轮核心优化
-
-内部记录有 26 个调试阶段。发布版只保留四轮会改变评测结论或运行稳定性的改动。
-
-1. `7 月 28-30 日`：拆分感知、策略和执行问题；增加动作白名单、条件计划和反事实诊断，
-   避免把接口缺失误判成模型能力。
-2. `7 月 31 日`：接通真实 TowerMind；完成 Observer/HUD、12 类原生动作、事件召回、
-   稳定对象 ID 和整局遥测。
-3. `7 月 31 日-8 月 4 日`：删除按波次猜胜负的逻辑；增加原生终局快照、新开局门禁、
-   跨图指纹、watchdog、断点续跑、流式响应和 reasoning trace。
-4. `8 月 5-6 日`：升级 Harness 2.5；规划与行动分两次请求，压缩重复战场字段，
-   合并低价值事件，并加入不消耗额外模型调用的本地比赛监控。
 
 ## 快速验证
 
@@ -80,9 +84,11 @@ cp .env.example .env
 模型通过配置选择；密钥只写入 `.env` 或 shell 环境变量。自建 OpenAI 兼容端点使用
 `api_base` 和 `api_key_env`，不要把实际密钥写入 JSON、日志或 Git。
 
-Harness 2.5 支持 `decision_pipeline=plan_then_action`：第一阶段保留高强度规划，第二阶段
-关闭 thinking，只生成行动 JSON。两次请求分别记录为 `planning` 和 `action`，规划输出
-被截断也不会挤掉行动阶段。
+Harness 2.5 支持 `decision_pipeline=plan_then_action`：第一阶段完成规划，第二阶段关闭
+thinking，只生成行动 JSON。两次请求分别记录为 `planning` 和 `action`，规划输出被截断
+也不会挤掉行动阶段。
+
+provider seed 只做 best effort，不能保证第三方 API 完全确定。
 
 ## 接入 TowerMind
 
@@ -104,24 +110,15 @@ tower-referee smoke \
 tower-campaign-local --model DeepSeek
 ```
 
-`tower-campaign-local` 只读取本地事件并打印关卡、终局和错误。它不改变游戏逻辑，
-也不会为了监控比赛而额外调用模型。结束后会生成 `model_decisions.md`。
+`tower-campaign-local` 只读取本地事件并打印关卡、终局和错误，不会为了监控比赛而额外
+调用模型。结束后会生成 `model_decisions.md`。
 
-## 有效性规则
-
-- 完整地图只认 ML-Agents 原生 terminal；`wave=5` 不等于通关。
-- 每张图在首次模型调用前检查波次、步数、金币、生命、预建塔和地图几何指纹。
-- 模型请求失败、JSON 修复失败、决策预算耗尽、watchdog 超时和 interrupted terminal
-  均写入 `validity.json`，不计分。
-- 漏怪数以基地生命差为准；伤害和击杀优先使用 Observer 的整局累计值。
-- provider seed 只是 best effort，不能保证第三方 API 完全确定。
+## 实验边界
 
 当前通天塔采用单次娱乐化展示口径，不能作为科学模型排名。正式研究需要重复试验，
 并冻结模型版本和参数。本仓库不发布现有模型成绩。
 
-## 发布边界
-
-公开：裁判源码、Observer 源码、无密钥配置、规则、测试和构建脚本。
+公开：裁判源码、Observer 源码、无密钥配置、测试和构建脚本。
 
 不公开：TowerMind 二进制、API Key、`.env`、模型成绩、本地 artifact、录屏、临时文件、
 内部调试记录和未验证配置。

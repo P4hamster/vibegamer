@@ -2,16 +2,14 @@
 
 **目标**
 
-在 TowerMind 上建立可复现的大模型塔防评测。统一六个模型的输入、动作、终局判定和结果记录。
+让不同大模型接管 TowerMind，并在统一规则下完成可验证实验。
 
 **范围**
 
-- 接入 TowerMind ML-Agents 和 LiteLLM
-- 增加 Observer/HUD、稳定对象 ID 和战斗遥测
-- 实现事件驱动决策、动作校验、条件计划和本地微操
-- 支持五地图闯关、原生终局门禁、断点续跑和无效结果熔断
-- 支持流式 reasoning trace、两阶段规划/行动和本地零模型监控
-- 导出 events、manifest、validity、summary、dashboard 和 model decision log
+- Observer 将 Unity/Gym 状态转换成稳定的战场语义字段，并暴露 12 类游戏动作
+- Agent 运行时完成模型接入、事件驱动决策、动作执行、条件计划和本地微操
+- 裁判只认原生 terminal；每关先验证新开局；中断、超时和请求失败不进入成绩
+- 支持五地图连续运行、受控续跑、完整事件日志、有效性报告和结果导出
 
 **验收**
 
