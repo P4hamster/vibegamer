@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>六个 AI 守城战绩台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="返回顶部">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>六个 AI 守一座城</span>
+    </a>
+    <nav class="tabs" aria-label="页面导航">
+      <a href="#ranking">总榜</a>
+      <a href="#maps">地图小分</a>
+      <a href="#profiles">能力雷达</a>
+      <a href="#audit">调用数据</a>
+    </nav>
+    <div class="live-indicator"><span></span> FINAL BUILD</div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">TOWERMIND / SIX-MODEL CAMPAIGN</p>
+        <h1 id="hero-title">六个 AI，守一座城</h1>
+        <p class="hero-lede">同一座塔防战场，五张地图连续攻防。这是六个模型的最终采用战绩。</p>
+        <div class="hero-winner">
+          <span class="winner-label">战役冠军</span>
+          <strong>DeepSeek V4 Flash</strong>
+          <span class="winner-score">83.87</span>
+          <span class="winner-result">5 / 5 全图通关</span>
+        </div>
+      </div>
+      <div class="hero-score-strip" id="heroScoreStrip" aria-label="六模型得分速览"></div>
+    </section>
+
+    <section class="snapshot-band" aria-label="整体摘要">
+      <div class="section-inner snapshot-grid">
+        <div><span class="snapshot-value">6</span><span class="snapshot-label">参赛模型</span></div>
+        <div><span class="snapshot-value">83.87</span><span class="snapshot-label">最高战役分</span></div>
+        <div><span class="snapshot-value">5 / 5</span><span class="snapshot-label">最远推进</span></div>
+        <div><span class="snapshot-value">¥24.24*</span><span class="snapshot-label">唯一人工记录费用</span></div>
+      </div>
+    </section>
+
+    <section class="section ranking-section" id="ranking">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">CAMPAIGN BOARD</p>
+            <h2>最终战绩总榜</h2>
+          </div>
+          <div class="sort-control" role="group" aria-label="排序方式">
+            <button class="active" data-sort="score">按得分</button>
+            <button data-sort="cleared">按通关</button>
+            <button data-sort="validity">按有效操作率</button>
+          </div>
+        </div>
+        <p class="leader-axis-label" id="leaderAxisLabel">横轴：战役得分（0-100）</p>
+        <div class="leaderboard" id="leaderboard"></div>
+      </div>
+    </section>
+
+    <section class="section map-section" id="maps">
+      <div class="map-backdrop" aria-hidden="true"></div>
+      <div class="section-inner map-content">
+        <div class="section-heading light">
+          <div>
+            <p class="section-kicker">FIVE DEFENSE LINES</p>
+            <h2>五张地图小分</h2>
+          </div>
+          <p class="heading-note">胜利关显示终局 HP；战败关显示抵达波次。未解锁关卡记为“—”。</p>
+        </div>
+        <div class="map-matrix-wrap">
+          <div class="map-matrix" id="mapMatrix"></div>
+        </div>
+        <div class="score-chart" id="scoreChart">
+          <div class="chart-head">
+            <div>
+              <p class="section-kicker">SCORE ROUTE</p>
+              <h3>五局得分走势</h3>
+            </div>
+            <div class="chart-zoom">
+              <label for="scoreChartZoom">纵轴范围 <output id="scoreChartZoomValue">40-100</output></label>
+              <input id="scoreChartZoom" type="range" min="0" max="80" step="1" value="40">
+              <button id="scoreChartReset" type="button">重置视图</button>
+            </div>
+          </div>
+          <div class="chart-legend" id="scoreChartLegend" aria-label="折线图模型筛选"></div>
+          <div class="chart-canvas-wrap">
+            <canvas id="scoreLineChart" width="1200" height="520" aria-label="六个模型五局得分动态折线图"></canvas>
+            <div class="chart-tooltip" id="scoreChartTooltip" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section profile-section" id="profiles">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">TACTICAL SCAN</p>
+            <h2>六模型能力雷达</h2>
+          </div>
+          <p class="heading-note">六项都直接取自战局记录：通关、剩余血量、击杀、金币使用、有效操作和难图成绩。</p>
+        </div>
+        <div class="radar-legend" id="radarLegend"></div>
+        <div class="profile-grid" id="profileGrid"></div>
+      </div>
+    </section>
+
+    <section class="section audit-section" id="audit">
+      <div class="section-inner">
+        <div class="section-heading light">
+          <div>
+            <p class="section-kicker">API TELEMETRY</p>
+            <h2>调用量与费用记录</h2>
+          </div>
+          <p class="heading-note">供应商未在 artifact 中返回精确 token usage。字符量为本地可审计记录，不等同于 token。</p>
+        </div>
+        <div class="audit-table-wrap">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>模型</th>
+                <th>API 阶段请求</th>
+                <th>输入 token</th>
+                <th>输出 token</th>
+                <th>已记录输入字符</th>
+                <th>已记录输出字符</th>
+                <th>费用</th>
+              </tr>
+            </thead>
+            <tbody id="auditRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="section-inner footer-inner">
+      <span>TOWERMIND CAMPAIGN ARCHIVE / 2026.08.07</span>
+      <a href="#top">返回顶部</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
