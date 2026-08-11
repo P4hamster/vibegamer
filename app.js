@@ -20,14 +20,13 @@ const models = [
     damagePerGold: 74.49,
     killRate: 80.16,
     winHp: 24,
-    requests: 174,
+    requests: 186,
     inputTokens: null,
     outputTokens: null,
     cachedTokens: null,
     inputChars: 2706476,
     outputChars: 2301929,
     cost: "¥3.43",
-    costNote: "最终采用 campaign",
     billingUrl: "https://platform.deepseek.com/usage",
     usageGuideUrl: "https://api-docs.deepseek.com/quick_start/pricing",
     radar: [100, 24, 80, 90, 87, 83],
@@ -62,7 +61,6 @@ const models = [
     inputChars: 1552096,
     outputChars: 1216300,
     cost: "¥0",
-    costNote: "赠送额度抵扣",
     billingUrl: "https://bigmodel.cn/console/overview",
     usageGuideUrl: "https://docs.bigmodel.cn/cn/guide/capabilities/cache",
     radar: [80, 58, 84, 99, 93, 55],
@@ -97,7 +95,6 @@ const models = [
     inputChars: null,
     outputChars: 40633,
     cost: "¥6.39132",
-    costNote: "最终录制实付；前段免费额度抵扣",
     billingUrl: "https://bailian.console.aliyun.com/",
     usageGuideUrl: "https://help.aliyun.com/zh/model-studio/model-usage-statistics",
     radar: [80, 25, 77, 76, 92, 56],
@@ -132,7 +129,6 @@ const models = [
     inputChars: 1793796,
     outputChars: 613873,
     cost: "¥35.33151",
-    costNote: "116 / 116 请求逐 ID 核对；按 K3 官方单价计算",
     billingUrl: "https://platform.kimi.com/console/fee-detail",
     usageGuideUrl: "https://platform.kimi.com/docs/pricing/chat",
     radar: [76, 28, 77, 89, 89, 45],
@@ -167,7 +163,6 @@ const models = [
     inputChars: 556693,
     outputChars: 58107,
     cost: "¥5.45",
-    costNote: "8 月 6 日 44 次调用；原始计费 ¥5.512572，抹零后实付",
     billingUrl: "https://console.volcengine.com/finance/bill/cost-analyse",
     usageGuideUrl: "https://www.volcengine.com/docs/82379/1159199?lang=zh",
     radar: [60, 40, 78, 77, 67, 42],
@@ -202,7 +197,6 @@ const models = [
     inputChars: 756336,
     outputChars: 84916,
     cost: "¥0",
-    costNote: "录制时间窗账单原价 ¥1.2313；代金券后实付 ¥0",
     billingUrl: "https://platform.minimaxi.com/console/consumption-detail",
     usageGuideUrl: "https://platform.minimaxi.com/docs/api-reference/text-prompt-caching",
     radar: [40, 30, 77, 100, 92, 28],
@@ -232,18 +226,18 @@ const chartColors = {
 };
 
 function formatNumber(value) {
-  if (value === null || value === undefined) return "未记录";
+  if (value === null || value === undefined) return '<span class="missing">-</span>';
   return new Intl.NumberFormat("zh-CN", { notation: "compact", maximumFractionDigits: 2 }).format(value);
 }
 
 function formatAuditNumber(value) {
-  if (value === null || value === undefined) return '<span class="missing">待平台导出</span>';
+  if (value === null || value === undefined) return '<span class="missing">-</span>';
   return new Intl.NumberFormat("zh-CN").format(value);
 }
 
 function formatCacheRate(model) {
   if (model.inputTokens === null || model.inputTokens === undefined || model.cachedTokens === null || model.cachedTokens === undefined) {
-    return '<span class="missing">待平台导出</span>';
+    return '<span class="missing">-</span>';
   }
   const totalInput = model.inputTokens + model.cachedTokens;
   if (totalInput === 0) return "0.00%";
@@ -340,7 +334,7 @@ function renderProfiles() {
         <div class="profile-metrics">
           <div><span>击杀率</span><strong>${model.killRate.toFixed(1)}%</strong></div>
           <div><span>伤害 / 金币</span><strong>${model.damagePerGold.toFixed(2)}</strong></div>
-          <div><span>输入 TOKEN</span><strong>${model.inputTokens === null ? "待导出" : formatNumber(model.inputTokens)}</strong></div>
+          <div><span>输入 TOKEN</span><strong>${model.inputTokens === null ? "-" : formatNumber(model.inputTokens)}</strong></div>
           <div><span>费用</span><strong>${model.cost || "未记录"}</strong></div>
         </div>
       </div>
@@ -645,10 +639,37 @@ function renderAuditRows() {
       <td>${formatCacheRate(model)}</td>
       <td>${formatNumber(model.inputChars)}</td>
       <td>${formatNumber(model.outputChars)}</td>
-      <td><span class="audit-cost">${model.cost || '<span class="missing">待核对</span>'}</span><small>${model.costNote || ""}</small></td>
+      <td><span class="audit-cost">${model.cost || '<span class="missing">-</span>'}</span></td>
       <td class="audit-links"><a href="${model.billingUrl}" target="_blank" rel="noreferrer">账单</a><a href="${model.usageGuideUrl}" target="_blank" rel="noreferrer">Token 指引</a></td>
     </tr>
   `).join("");
+}
+
+const recordingCosts = {
+  deepseek: 3.43,
+  glm: 0,
+  qwen: 6.39132,
+  kimi: 35.33151,
+  doubao: 5.45,
+  minimax: 0
+};
+
+function renderCostChart() {
+  const root = document.querySelector("#recordingCostChart");
+  const chartMax = 40;
+  root.innerHTML = models.map(model => {
+    const value = recordingCosts[model.id];
+    const height = value / chartMax * 100;
+    return `
+      <div class="cost-column" style="--model-color:${model.color};--bar-height:${height}%">
+        <strong class="cost-value">${model.cost}</strong>
+        <div class="cost-bar-stage" aria-label="${model.shortName} 录制版实付 ${model.cost}">
+          <span class="cost-bar${value === 0 ? " is-zero" : ""}"></span>
+        </div>
+        <span class="cost-name">${model.shortName}</span>
+      </div>
+    `;
+  }).join("");
 }
 
 document.querySelectorAll(".sort-control button").forEach(button => {
@@ -666,3 +687,4 @@ renderScoreChart();
 renderRadarLegend();
 renderProfiles();
 renderAuditRows();
+renderCostChart();
