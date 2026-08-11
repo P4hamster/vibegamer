@@ -20,10 +20,16 @@ const models = [
     damagePerGold: 74.49,
     killRate: 80.16,
     winHp: 24,
-    requests: 170,
+    requests: 174,
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
     inputChars: 2706476,
     outputChars: 2301929,
-    cost: null,
+    cost: "¥3.43",
+    costNote: "最终采用 campaign",
+    billingUrl: "https://platform.deepseek.com/usage",
+    usageGuideUrl: "https://api-docs.deepseek.com/quick_start/pricing",
     radar: [100, 24, 80, 90, 87, 83],
     strength: "唯一五图全通，各图小分波动仅 3.15 分，长线稳定性最强。",
     weakness: "五张胜图平均仅剩 4.8 HP，属于高风险险胜；动作合法率 87.2%。"
@@ -49,10 +55,16 @@ const models = [
     damagePerGold: 81.98,
     killRate: 84.15,
     winHp: 58.33,
-    requests: 106,
+    requests: 109,
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
     inputChars: 1552096,
     outputChars: 1216300,
-    cost: null,
+    cost: "¥0",
+    costNote: "赠送额度抵扣",
+    billingUrl: "https://bigmodel.cn/console/overview",
+    usageGuideUrl: "https://docs.bigmodel.cn/cn/guide/capabilities/cache",
     radar: [80, 58, 84, 99, 93, 55],
     strength: "前三图平均 91.09 分，胜图平均剩 11.7 HP，守城质量六模型最高。",
     weakness: "地图 2 最后一波归零；53 次决策中 37 轮规划触顶，响应耗时明显。"
@@ -78,10 +90,16 @@ const models = [
     damagePerGold: 62.38,
     killRate: 76.87,
     winHp: 25,
-    requests: 71,
+    requests: 74,
+    inputTokens: 622912,
+    outputTokens: 15223,
+    cachedTokens: 0,
     inputChars: null,
     outputChars: 40633,
-    cost: null,
+    cost: "¥6.39132",
+    costNote: "最终录制实付；前段免费额度抵扣",
+    billingUrl: "https://bailian.console.aliyun.com/",
+    usageGuideUrl: "https://help.aliyun.com/zh/model-studio/model-usage-statistics",
     radar: [80, 25, 77, 76, 92, 56],
     strength: "连过前三图，地图 2 也推进至最后一波；动作合法率 92.3%。",
     weakness: "三张胜图平均仅剩 5 HP，防线容错低；资源转化效率在六模型中偏低。"
@@ -107,10 +125,16 @@ const models = [
     damagePerGold: 73.01,
     killRate: 76.75,
     winHp: 28.33,
-    requests: 116,
+    requests: 36,
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
     inputChars: 1793796,
     outputChars: 613873,
-    cost: "¥24.24*",
+    cost: null,
+    costNote: "最终录制待按时间窗提取",
+    billingUrl: "https://platform.kimi.com/console/fee-detail",
+    usageGuideUrl: "https://www.kimi.com/zh-cn/help/kimi-api/api-balance-and-usage",
     radar: [76, 28, 77, 89, 89, 45],
     strength: "前三图持续通关，地图 0 拿到 88.00；资源转化与操作纪律都较均衡。",
     weakness: "地图 2 仅到第 4 波，飞行怪、冻结与云雾叠加后再规划不够及时。"
@@ -136,10 +160,16 @@ const models = [
     damagePerGold: 63.61,
     killRate: 78,
     winHp: 40,
-    requests: 42,
+    requests: 44,
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
     inputChars: 556693,
     outputChars: 58107,
     cost: null,
+    costNote: "最终录制待按时间窗提取",
+    billingUrl: "https://console.volcengine.com/finance/bill/cost-analyse",
+    usageGuideUrl: "https://www.volcengine.com/docs/82379/1159199?lang=zh",
     radar: [60, 40, 78, 77, 67, 42],
     strength: "地图 0 拿到 89.44，胜图平均剩 8 HP，开局建防和基础火力不差。",
     weakness: "总动作合法率仅 66.7%；地图 1 单关出现 16 次无效动作，执行稳定性是主要短板。"
@@ -165,10 +195,16 @@ const models = [
     damagePerGold: 82.44,
     killRate: 77.03,
     winHp: 30,
-    requests: 68,
+    requests: 69,
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
     inputChars: 756336,
     outputChars: 84916,
     cost: null,
+    costNote: "最终录制待按时间窗提取",
+    billingUrl: "https://platform.minimaxi.com/",
+    usageGuideUrl: "https://platform.minimaxi.com/docs/api-reference/text-prompt-caching",
     radar: [40, 30, 77, 100, 92, 28],
     strength: "伤害/金币达 82.44，六模型最高；动作合法率 92.1%，局部资源使用很省。",
     weakness: "只通关首图，地图 1 最后一波归零；高资源效率没有转化为战役推进。"
@@ -198,6 +234,20 @@ const chartColors = {
 function formatNumber(value) {
   if (value === null || value === undefined) return "未记录";
   return new Intl.NumberFormat("zh-CN", { notation: "compact", maximumFractionDigits: 2 }).format(value);
+}
+
+function formatAuditNumber(value) {
+  if (value === null || value === undefined) return '<span class="missing">待平台导出</span>';
+  return new Intl.NumberFormat("zh-CN").format(value);
+}
+
+function formatCacheRate(model) {
+  if (model.inputTokens === null || model.inputTokens === undefined || model.cachedTokens === null || model.cachedTokens === undefined) {
+    return '<span class="missing">待平台导出</span>';
+  }
+  const totalInput = model.inputTokens + model.cachedTokens;
+  if (totalInput === 0) return "0.00%";
+  return `${(model.cachedTokens / totalInput * 100).toFixed(2)}%`;
 }
 
 function renderHeroStrip() {
@@ -290,7 +340,7 @@ function renderProfiles() {
         <div class="profile-metrics">
           <div><span>击杀率</span><strong>${model.killRate.toFixed(1)}%</strong></div>
           <div><span>伤害 / 金币</span><strong>${model.damagePerGold.toFixed(2)}</strong></div>
-          <div><span>输入 TOKEN</span><strong>未记录</strong></div>
+          <div><span>输入 TOKEN</span><strong>${model.inputTokens === null ? "待导出" : formatNumber(model.inputTokens)}</strong></div>
           <div><span>费用</span><strong>${model.cost || "未记录"}</strong></div>
         </div>
       </div>
@@ -589,11 +639,14 @@ function renderAuditRows() {
     <tr style="--model-color:${model.color}">
       <td><span class="audit-model">${model.shortName}</span></td>
       <td>${model.requests}</td>
-      <td><span class="missing">未记录</span></td>
-      <td><span class="missing">未记录</span></td>
+      <td>${formatAuditNumber(model.inputTokens)}</td>
+      <td>${formatAuditNumber(model.outputTokens)}</td>
+      <td>${formatAuditNumber(model.cachedTokens)}</td>
+      <td>${formatCacheRate(model)}</td>
       <td>${formatNumber(model.inputChars)}</td>
       <td>${formatNumber(model.outputChars)}</td>
-      <td>${model.cost || '<span class="missing">未记录</span>'}</td>
+      <td><span class="audit-cost">${model.cost || '<span class="missing">待核对</span>'}</span><small>${model.costNote || ""}</small></td>
+      <td class="audit-links"><a href="${model.billingUrl}" target="_blank" rel="noreferrer">账单</a><a href="${model.usageGuideUrl}" target="_blank" rel="noreferrer">Token 指引</a></td>
     </tr>
   `).join("");
 }

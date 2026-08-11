@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <title>六个 AI 守城战绩台</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=20260807-1">
+  <link rel="stylesheet" href="styles.css?v=20260811-1">
 </head>
 <body>
   <header class="topbar">
@@ -45,7 +45,7 @@
         <div><span class="snapshot-value">6</span><span class="snapshot-label">参赛模型</span></div>
         <div><span class="snapshot-value">83.87</span><span class="snapshot-label">最高战役分</span></div>
         <div><span class="snapshot-value">5 / 5</span><span class="snapshot-label">最远推进</span></div>
-        <div><span class="snapshot-value">¥24.24*</span><span class="snapshot-label">唯一人工记录费用</span></div>
+        <div><span class="snapshot-value">¥9.82132</span><span class="snapshot-label">已核实最终录制实付（3 / 6）</span></div>
       </div>
     </section>
 
@@ -122,23 +122,30 @@
             <p class="section-kicker">API TELEMETRY</p>
             <h2>调用量与费用记录</h2>
           </div>
-          <p class="heading-note">供应商未在 artifact 中返回精确 token usage。字符量为本地可审计记录，不等同于 token。</p>
+          <p class="heading-note">只统计最终采用的录制版 campaign；费用来自供应商后台，Token 缺项等待按录制时间窗导出。</p>
         </div>
         <div class="audit-table-wrap">
           <table class="audit-table">
             <thead>
               <tr>
                 <th>模型</th>
-                <th>API 阶段请求</th>
-                <th>输入 token</th>
+                <th>API 实际请求</th>
+                <th>输入 token（不含缓存）</th>
                 <th>输出 token</th>
+                <th>缓存 token</th>
+                <th>缓存命中率</th>
                 <th>已记录输入字符</th>
                 <th>已记录输出字符</th>
-                <th>费用</th>
+                <th>最终录制实付</th>
+                <th>官方入口</th>
               </tr>
             </thead>
             <tbody id="auditRows"></tbody>
           </table>
+        </div>
+        <div class="audit-notes">
+          <p><strong>当前已核实：</strong>DeepSeek 最终录制 ¥3.43；Qwen 最终录制 74 次请求、输入 622,912、输出 15,223、缓存 0，实付 ¥6.39132；GLM 使用赠送额度，现金支出 ¥0。Kimi ¥91.17844、豆包 ¥10.18、MiniMax ¥4.18 都是多轮测试累计值，因不符合本表口径而暂不计入。</p>
+          <p><strong>Token 口径：</strong>缓存命中率 = 缓存命中 Token ÷（非缓存输入 Token + 缓存命中 Token）。历史 artifact 没有保存供应商 <code>usage</code>，所以缺项只能按最终录制时间窗与本地实际请求数交叉核验；字符量不能换算成精确 Token。</p>
         </div>
       </div>
     </section>
@@ -146,11 +153,11 @@
 
   <footer>
     <div class="section-inner footer-inner">
-      <span>TOWERMIND CAMPAIGN ARCHIVE / 2026.08.07</span>
+      <span>TOWERMIND CAMPAIGN ARCHIVE / 2026.08.11</span>
       <a href="#top">返回顶部</a>
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260811-1"></script>
 </body>
 </html>
