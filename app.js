@@ -219,11 +219,31 @@ const mapNames = ["地图 0", "地图 1", "地图 3", "地图 2", "地图 4"];
 const chartColors = {
   deepseek: "#3d63ff",
   glm: "#181818",
+  glm52: "#181818",
   qwen: "#8b5cf6",
   kimi: "#8b9198",
   doubao: "#ff8a2a",
   minimax: "#ff2f7d"
 };
+
+const glm52ScoreSeries = {
+  id: "glm52",
+  name: "GLM 5.2",
+  chartLabel: "GLM 5.2",
+  lineDash: [10, 7],
+  maps: [
+    { score: 92.06 },
+    { score: 89.55 },
+    { score: 91.66 },
+    { score: 68.93 },
+    null
+  ]
+};
+
+const scoreChartSeries = models.flatMap(model => model.id === "glm"
+  ? [model, glm52ScoreSeries]
+  : [model]
+);
 
 function formatNumber(value) {
   if (value === null || value === undefined) return '<span class="missing">-</span>';
@@ -427,7 +447,7 @@ function drawRadar(canvas, values, color) {
 }
 
 const scoreChartState = {
-  visible: new Set(models.map(model => model.id)),
+  visible: new Set(scoreChartSeries.map(model => model.id)),
   progress: 1,
   frame: null,
   points: [],
@@ -506,7 +526,7 @@ function drawScoreLineChart(progress = 1) {
   ctx.rect(plot.left - 8, plot.top - 8, plotWidth + 16, plotHeight + 16);
   ctx.clip();
 
-  models.forEach((model, modelIndex) => {
+  scoreChartSeries.forEach(model => {
     if (!scoreChartState.visible.has(model.id)) return;
     const values = model.maps
       .map((stage, index) => stage ? { index, score: stage.score } : null)
@@ -519,7 +539,7 @@ function drawScoreLineChart(progress = 1) {
     const lineColor = chartColors[model.id];
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = compact ? 3 : 4;
-    ctx.setLineDash([]);
+    ctx.setLineDash(model.lineDash || []);
     ctx.moveTo(xFor(values[0].index), yFor(values[0].score));
     for (let index = 1; index < values.length; index += 1) {
       const previous = values[index - 1];
@@ -569,9 +589,9 @@ function renderScoreChart() {
   const legend = document.querySelector("#scoreChartLegend");
   const tooltip = document.querySelector("#scoreChartTooltip");
 
-  legend.innerHTML = models.map(model => `
-    <button class="chart-key active" type="button" data-model="${model.id}" style="--model-color:${chartColors[model.id]}" aria-pressed="true">
-      <span></span>${model.shortName}
+  legend.innerHTML = scoreChartSeries.map(model => `
+    <button class="chart-key active${model.lineDash ? " is-dashed" : ""}" type="button" data-model="${model.id}" style="--model-color:${chartColors[model.id]}" aria-pressed="true">
+      <span></span>${model.chartLabel || model.shortName}
     </button>
   `).join("");
 

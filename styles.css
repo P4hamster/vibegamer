@@ -726,6 +726,10 @@ h1 {
   background: var(--model-color);
 }
 
+.chart-key.is-dashed span {
+  background: repeating-linear-gradient(to right, var(--model-color) 0 7px, transparent 7px 11px);
+}
+
 .chart-canvas-wrap {
   position: relative;
   overflow: hidden;
